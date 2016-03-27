@@ -44,13 +44,19 @@ class Decider(object):
                 self.entrypoint(meta, event_history)
             except (exceptions.EventException, exceptions.DeciderException) as e:
                 log.error("Workflow failed")
-                utils.fail_workflow(client, meta.task_token, reason=e.__class__.__name__, details=e.message)
-                continue
+                self.fail_workflow(
+                    client, meta.task_token,
+                    reason=e.__class__.__name__,
+                    details=e.message
+                )
             except exceptions.RetryLimitExceededException as e:
                 message = "Retry limit exceeded, failing workflow"
                 log.error(message)
-                utils.fail_workflow(client, meta.task_token, reason=e.__class__.__name__, details=message)
-                continue
+                self.fail_workflow(
+                    client, meta.task_token,
+                    reason=e.__class__.__name__,
+                    details=e.message
+                )
             except exceptions.TimerStarted:
                 continue
             except exceptions.ActivityTimeoutException:
@@ -60,21 +66,34 @@ class Decider(object):
             except exceptions.ActivityTaskScheduled:
                 continue
             except exceptions.WorkflowComplete:
-                try:
-                    utils.complete_workflow(client, meta.task_token)
-                except ClientError as e:
-                    log.error("Unable to complete workflow: %s", e.message)
+                self.complete_workflow(client, meta.task_token)
             except ClientError as e:
-                try:
-                    utils.fail_workflow(client, meta.task_token, reason=e.__class__.__name__, details=e.message)
-                except ClientError as e:
-                    log.error("Unable to fail workflow: %s", e.message)
+                log.error(e.message)
+                self.fail_workflow(
+                    client, meta.task_token,
+                    reason=e.__class__.__name__,
+                    details=e.message
+                )
             except Exception as e:
-                print("Unhandled Workflow Failure", e, e.message)
-                try:
-                    utils.fail_workflow(client, meta.task_token, reason=e.__class__.__name__, details=e.message)
-                except ClientError as e:
-                    log.error("Unable to fail workflow: %s", e.message)
+                log.error("Unhandled Workflow Failure %s", e.message)
+                log.exception(e)
+                self.fail_workflow(
+                    client, meta.task_token,
+                    reason=e.__class__.__name__,
+                    details=e.message
+                )
+
+    def complete_workflow(self, client, task_token, result="success"):
+        try:
+            utils.complete_workflow(client, task_token, result=result)
+        except ClientError as e:
+            log.error("Unable to complete workflow: %s", e.message)
+
+    def fail_workflow(self, client, task_token, reason, details=""):
+        try:
+            utils.fail_workflow(client, task_token, reason=reason, details=details)
+        except ClientError as e:
+            log.error("Unable to fail workflow: %s", e.message)
 
     def entrypoint(self, meta, event_history):
         workflow = self.workflow
