@@ -87,20 +87,20 @@ def activity(name=None, version="0.0.1", retries=0):
                     # Scheduled
                     # Started | Timeout - It has to start in order to fail
                     # Timeout | Failure | Completed
-                    next_event = self.event_queue.popleft()
 
-                    if next_event.type == "ActivityTaskTimedOut":
-                        if next_event.num_retries <= func.swf_retries:
-                            log.info("ActivityTask timed out, Retrying...")
-                            next_event.retry()
-                            raise exceptions.ActivityTimeoutException()
-                        else:
-                            raise exceptions.RetryLimitExceededException()
+                    # --- next_event = self.event_queue.popleft()
 
-                    # this would be ActivityTaskStarted
-                    # Which would be followed by Failed or Completed
-                    if len(self.event_queue) > 0:
+                    # WARNING THIS WILL NOT HANDLE PARALLEL TASK
+                    # DECISIONS. IT *WILL* BLOW UP. PARALLEL TASK
+                    # DECISIONS WILL REQUIRE A REFACTOR
+                    #
+                    # because we can retry, we need to find the last
+                    # activity event in the chain (NOT PARALLEL SAFE)
+
+                    while len(self.event_queue) > 0:
                         next_event = self.event_queue.popleft()
+                        if next_event.type == "ActivityTaskCompleted":
+                            break
 
                     if next_event.type == "ActivityTaskFailed" or \
                        next_event.type == "ActivityTaskTimedOut":
