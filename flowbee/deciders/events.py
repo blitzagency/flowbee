@@ -91,6 +91,26 @@ class DeciderEvent(object):
 
 
 class WorkflowExecutionStarted(DeciderEvent):
+    """WorkflowExecutionStarted Event
+
+    {
+        u'eventId': 1,
+        u'eventTimestamp': datetime.datetime(2016, 3, 26, 22, 20, 7, 17000, tzinfo=tzlocal()),
+        u'eventType': u'WorkflowExecutionStarted',
+        u'workflowExecutionStartedEventAttributes': {
+            u'childPolicy': u'TERMINATE',
+            u'executionStartToCloseTimeout': u'60',
+            u'input': u'H4sIADdu91YC/6tWyk0tSVSyUqiu1VFQSkmEsJVApFKSkg6IsFIwrK0FALiLFCcoAAAA',
+            u'parentInitiatedEventId': 0,
+            u'taskList': {u'name': u'flowbee-test-tasks'},
+            u'taskPriority': u'0',
+            u'taskStartToCloseTimeout': u'10',
+            u'workflowType': {
+                u'name': u'MyWorkflow.MyActivities',
+                u'version': u'0.0.1'}
+        }
+    }
+    """
     def prepare_event(self):
         try:
             attributes = self.event["workflowExecutionStartedEventAttributes"]
@@ -172,33 +192,29 @@ class ActivityAbstractFailure(DeciderEvent):
         ])
 
 
-class ActivityTaskTimedOut(ActivityAbstractFailure):
-
-    def prepare_event(self):
-        self.num_retries = 0
-        attributes = self.event.get("activityTaskTimedOutEventAttributes")
-        self.process_history(attributes)
-
-
-class ActivityTaskFailed(ActivityAbstractFailure):
-    def prepare_event(self):
-        self.num_retries = 0
-        attributes = self.event.get("activityTaskFailedEventAttributes")
-        self.process_history(attributes)
-
-
-class ActivityTaskStarted(DeciderEvent):
-    def prepare_event(self):
-        # {
-        #     u'activityTaskStartedEventAttributes': {u'identity': u'fx-cms-publisher-worker-1', u'scheduledEventId': 8},
-        #     u'eventId': 9,
-        #     u'eventTimestamp': datetime.datetime(2016, 3, 25, 15, 2, 43, 874000, tzinfo=tzlocal()),
-        #     u'eventType': u'ActivityTaskStarted'
-        # }
-        return
-
-
 class ActivityTaskScheduled(DeciderEvent):
+    """ActivityTaskScheduled Event
+
+    {
+        u'activityTaskScheduledEventAttributes': {
+            u'activityId': u'com.flowbee-test.MyWorkflow.MyWorkflow.MyActivities-eb4d44a2c088452a8de053caf50209f7.23gHXuoeTXnzl8Xts+14bNNscjpxZaCJmit8tr2y2Ofzs=.stage1@0.0.1-0',
+            u'activityType': {
+                u'name': u'stage1',
+                u'version': u'0.0.1'},
+            u'decisionTaskCompletedEventId': 9,
+            u'heartbeatTimeout': u'NONE',
+            u'input': u'H4sIADxu91YC/6tWSixKL1ayUohWyilNrlSK1VFQyi6HilUrpeXng+lEIKmUpKQDIqwUDGtrawHg8m1aOQAAAA==',
+            u'scheduleToCloseTimeout': u'10',
+            u'scheduleToStartTimeout': u'10',
+            u'startToCloseTimeout': u'NONE',
+            u'taskList': {u'name': u'flowbee-test-tasks'},
+            u'taskPriority': u'0'},
+        u'eventId': 10,
+        u'eventTimestamp': datetime.datetime(2016, 3, 26, 22, 20, 12, 560000, tzinfo=tzlocal()),
+        u'eventType': u'ActivityTaskScheduled'
+    }
+    """
+
     def prepare_event(self):
         try:
             attributes = self.event["activityTaskScheduledEventAttributes"]
@@ -221,7 +237,37 @@ class ActivityTaskScheduled(DeciderEvent):
             self.payload = None
 
 
+class ActivityTaskStarted(DeciderEvent):
+    """ActivityTaskStarted
+
+    {
+        u'activityTaskStartedEventAttributes': {
+            u'identity': u'MyWorkflow',
+            u'scheduledEventId': 10},
+        u'eventId': 11,
+        u'eventTimestamp': datetime.datetime(2016, 3, 26, 22, 20, 12, 599000, tzinfo=tzlocal()),
+        u'eventType': u'ActivityTaskStarted'
+    }
+    """
+
+    def prepare_event(self):
+        return
+
+
 class ActivityTaskCompleted(DeciderEvent):
+    """ActivityTaskCompleted Event
+
+    {
+        u'eventId': 15,
+        u'eventType': u'ActivityTaskCompleted',
+        u'activityTaskCompletedEventAttributes': {
+            u'startedEventId': 14,
+            u'scheduledEventId': 13,
+            u'result': u'H4sIABZt91YC/1MqLilKLE9KLSrKTC1WAgBhRJKGDgAAAA=='},
+        u'eventTimestamp': datetime.datetime(2016, 3, 26, 22, 15, 17, 771000, tzinfo=tzlocal())
+    }
+    """
+
     def prepare_event(self):
         data = self.event \
             .get("activityTaskCompletedEventAttributes", {}) \
@@ -231,6 +277,33 @@ class ActivityTaskCompleted(DeciderEvent):
             self.payload = self.deserialize(data)
         else:
             self.payload = None
+
+
+class ActivityTaskTimedOut(ActivityAbstractFailure):
+    """ActivityTaskTimedOut Event
+
+    {
+        u'activityTaskTimedOutEventAttributes': {
+            u'scheduledEventId': 16,
+            u'startedEventId': 17,
+            u'timeoutType': u'SCHEDULE_TO_CLOSE'},
+        u'eventId': 18,
+        u'eventTimestamp': datetime.datetime(2016, 3, 26, 22, 29, 57, 609000, tzinfo=tzlocal()),
+        u'eventType': u'ActivityTaskTimedOut'
+    }
+    """
+
+    def prepare_event(self):
+        self.num_retries = 0
+        attributes = self.event.get("activityTaskTimedOutEventAttributes")
+        self.process_history(attributes)
+
+
+class ActivityTaskFailed(ActivityAbstractFailure):
+    def prepare_event(self):
+        self.num_retries = 0
+        attributes = self.event.get("activityTaskFailedEventAttributes")
+        self.process_history(attributes)
 
 
 class ScheduleActivityTaskFailed(DeciderEvent):
@@ -249,6 +322,19 @@ class ScheduleActivityTaskFailed(DeciderEvent):
 
 
 class TimerStarted(DeciderEvent):
+    """TimerStarted Event
+
+    {
+        u'eventId': 5,
+        u'eventTimestamp': datetime.datetime(2016, 3, 26, 22, 20, 7, 363000, tzinfo=tzlocal()),
+        u'eventType': u'TimerStarted',
+        u'timerStartedEventAttributes': {
+            u'decisionTaskCompletedEventId': 4,
+            u'startToFireTimeout': u'5',
+            u'timerId': u'com.flowbee-test.MyWorkflow.MyWorkflow.MyActivities-eb4d44a2c088452a8de053caf50209f7.23gHXuoeTXnzl8Xts+14bNNscjpxZaCJmit8tr2y2Ofzs='}
+    }
+    """
+
     def prepare_event(self):
 
         try:
@@ -272,6 +358,18 @@ class TimerStarted(DeciderEvent):
 
 
 class TimerFired(DeciderEvent):
+    """TimerFired Event
+
+    {
+        u'eventId': 6,
+        u'eventTimestamp': datetime.datetime(2016, 3, 26, 22, 20, 12, 367000, tzinfo=tzlocal()),
+        u'eventType': u'TimerFired',
+        u'timerFiredEventAttributes': {
+            u'startedEventId': 5,
+            u'timerId': u'com.flowbee-test.MyWorkflow.MyWorkflow.MyActivities-eb4d44a2c088452a8de053caf50209f7.23gHXuoeTXnzl8Xts+14bNNscjpxZaCJmit8tr2y2Ofzs='}
+    }
+    """
+
     def prepare_event(self):
         timer_id = self.event.get("timerFiredEventAttributes", {}).get("timerId")
         self.timer_id = timer_id
