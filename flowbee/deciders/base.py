@@ -60,13 +60,21 @@ class Decider(object):
             except exceptions.ActivityTaskScheduled:
                 continue
             except exceptions.WorkflowComplete:
-                utils.complete_workflow(client, meta.task_token)
+                try:
+                    utils.complete_workflow(client, meta.task_token)
+                except ClientError as e:
+                    log.error("Unable to complete workflow: %s", e.message)
             except ClientError as e:
-                print(e.message)
-                utils.fail_workflow(client, meta.task_token, reason=e.__class__.__name__, details=e.message)
+                try:
+                    utils.fail_workflow(client, meta.task_token, reason=e.__class__.__name__, details=e.message)
+                except ClientError as e:
+                    log.error("Unable to fail workflow: %s", e.message)
             except Exception as e:
                 print("Unhandled Workflow Failure", e, e.message)
-                utils.fail_workflow(client, meta.task_token, reason=e.__class__.__name__, details=e.message)
+                try:
+                    utils.fail_workflow(client, meta.task_token, reason=e.__class__.__name__, details=e.message)
+                except ClientError as e:
+                    log.error("Unable to fail workflow: %s", e.message)
 
     def entrypoint(self, meta, event_history):
         workflow = self.workflow
