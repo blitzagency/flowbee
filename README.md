@@ -40,6 +40,7 @@ class MyWorkflow(Workflow):
 # do each of these in separate terminals
 # starting either the worker or decider ensures the
 # SWF resources are created on your AWS account
+# If you don't want this behavior pass --no-sync
 python -m flowbee.cli.decider -f flowbee.cli.test.MyWorkflow -w 4
 python -m flowbee.cli.worker -f flowbee.cli.test.MyWorkflow -w 4
 ```
