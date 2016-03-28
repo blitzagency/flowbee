@@ -54,69 +54,70 @@ def activity(name=None, version="0.0.1", retries=0):
             if self.is_decider is False:
                 result = func(self, *args, **kwargs)
                 return result
-            else:
-                event = None
-                try:
-                    event = self.event_queue.popleft()
-                except IndexError:
-                    pass
 
-                if event is None:
-                    payload = {"args": args, "kwargs": kwargs}
-                    z_payload = compression.compress_b64_json(payload)
+            event = None
 
-                    activity_id = "{0}.{1}@{2}".format(
-                        self.workflow.identifier, func.swf_name, func.swf_version
-                    )
+            try:
+                event = self.event_queue.popleft()
+            except IndexError:
+                pass
 
-                    log.info("Scheduling Activity '%s@%s' with payload %s", func.swf_name, func.swf_version, z_payload)
-                    print("Scheduling Activity")
-                    utils.schedule_activity(
-                        client=self.client,
-                        tasklist=self.workflow.meta.tasklist,
-                        activity_id=activity_id,
-                        task_token=self.workflow.meta.task_token,
-                        name=func.swf_name,
-                        version=func.swf_version,
-                        payload=z_payload,
-                    )
-                    raise exceptions.ActivityTaskScheduled()
+            if event is None:
+                payload = {"args": args, "kwargs": kwargs}
+                z_payload = compression.compress_b64_json(payload)
 
-                if event.type == "ActivityTaskScheduled":
-                    # The order should be this
-                    # Scheduled
-                    # Started | Timeout - It has to start in order to fail
-                    # Timeout | Failure | Completed
+                activity_id = "{0}.{1}@{2}".format(
+                    self.workflow.identifier, func.swf_name, func.swf_version
+                )
 
-                    # --- next_event = self.event_queue.popleft()
+                log.info("Scheduling Activity '%s@%s' with payload %s", func.swf_name, func.swf_version, z_payload)
+                print("Scheduling Activity")
+                utils.schedule_activity(
+                    client=self.client,
+                    tasklist=self.workflow.meta.tasklist,
+                    activity_id=activity_id,
+                    task_token=self.workflow.meta.task_token,
+                    name=func.swf_name,
+                    version=func.swf_version,
+                    payload=z_payload,
+                )
+                raise exceptions.ActivityTaskScheduled()
 
-                    # WARNING THIS WILL NOT HANDLE PARALLEL TASK
-                    # DECISIONS. IT *WILL* BLOW UP. PARALLEL TASK
-                    # DECISIONS WILL REQUIRE A REFACTOR
-                    #
-                    # because we can retry, we need to find the last
-                    # activity event in the chain (NOT PARALLEL SAFE)
+            if event.type == "ActivityTaskScheduled":
+                # The order should be this
+                # Scheduled
+                # Started | Timeout - It has to start in order to fail
+                # Timeout | Failure | Completed
 
-                    while len(self.event_queue) > 0:
-                        next_event = self.event_queue.popleft()
-                        if next_event.type == "ActivityTaskCompleted":
-                            break
+                # --- next_event = self.event_queue.popleft()
 
-                    if next_event.type == "ActivityTaskFailed" or \
-                       next_event.type == "ActivityTaskTimedOut":
+                # WARNING THIS WILL NOT HANDLE PARALLEL TASK
+                # DECISIONS. IT *WILL* BLOW UP. PARALLEL TASK
+                # DECISIONS WILL REQUIRE A REFACTOR
+                #
+                # because we can retry, we need to find the last
+                # activity event in the chain (NOT PARALLEL SAFE)
 
-                        if next_event.num_retries <= func.swf_retries:
-                            log.info("ActivityTask timed out, Retrying...")
-                            next_event.retry()
-                            if next_event.type == "ActivityTaskFailed":
-                                raise exceptions.ActivityFailedException()
-                            if next_event.type == "ActivityTaskTimedOut":
-                                raise exceptions.ActivityTimeoutException()
-                        else:
-                            raise exceptions.RetryLimitExceededException()
-
+                while len(self.event_queue) > 0:
+                    next_event = self.event_queue.popleft()
                     if next_event.type == "ActivityTaskCompleted":
-                        return next_event.payload
+                        break
+
+                if next_event.type == "ActivityTaskFailed" or \
+                   next_event.type == "ActivityTaskTimedOut":
+
+                    if next_event.num_retries <= func.swf_retries:
+                        log.info("ActivityTask timed out, Retrying...")
+                        next_event.retry()
+                        if next_event.type == "ActivityTaskFailed":
+                            raise exceptions.ActivityFailedException()
+                        if next_event.type == "ActivityTaskTimedOut":
+                            raise exceptions.ActivityTimeoutException()
+                    else:
+                        raise exceptions.RetryLimitExceededException()
+
+                if next_event.type == "ActivityTaskCompleted":
+                    return next_event.payload
         return action
     return wrap
 
