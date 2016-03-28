@@ -67,6 +67,26 @@ class Workflow(object):
                 "reason: %s",
                 workflow_id, run_id, e.message
             )
+            return False
+
+        try:
+            status_code = response["ResponseMetadata"]["HTTPStatusCode"]
+        except KeyError as e:
+            log.error(
+                "Failed to get status code from cancel "
+                "response. Missing key: '%s' %s", e.message, response
+            )
+            return False
+
+        if status_code == 200:
+            return True
+        else:
+            log.error(
+                "Cancel response status code was not "
+                "'200', got '%s' in %s", status_code, response
+            )
+            return False
+
 
     @classmethod
     def start_execution(
