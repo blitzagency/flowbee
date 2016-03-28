@@ -94,7 +94,7 @@ def create_resources(workflow_class):
         create_activity(client, domain, name, version, tasklist)
 
 
-def create_domain(client, domain, description="", retention_period=10):
+def create_domain(client, domain, description="", retention_period=1):
     log.debug("Creating SWF Domain: '%s'", domain)
     try:
         client.register_domain(
