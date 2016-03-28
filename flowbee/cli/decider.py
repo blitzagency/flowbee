@@ -31,10 +31,11 @@ class DeciderRunner(Runner):
 
 @click.command()
 @click.version_option(version='0.0.1')
-@click.option('--workers', "-w", default=1, help='Number of workers.')
-@click.option('--workflow', "-f", required=True, help='Python path for workflow ex: foo.bar.Baz')
-@click.option('--pidfile', "-p", default="/tmp/swfdecider.pid", help='PID file')
-def main(workers, workflow, pidfile):
+@click.option('--workers', "-w", default=1, help="Number of workers.")
+@click.option('--workflow', "-f", required=True, help="Python path for workflow ex: foo.bar.Baz")
+@click.option('--pidfile', "-p", default="/tmp/swfdecider.pid", help="PID file")
+@click.option('--sync/--no-sync', default=True, help="Should AWS SWF Resources be created?")
+def main(workers, workflow, pidfile, sync):
     init_logging()
     runner = DeciderRunner(workers=workers, workflow=workflow, pidfile=pidfile)
 
@@ -53,7 +54,7 @@ def main(workers, workflow, pidfile):
         pid = str(os.getpid())
         f.write(pid)
 
-    runner.start()
+    runner.start(sync=sync)
 
 if __name__ == "__main__":
     main()

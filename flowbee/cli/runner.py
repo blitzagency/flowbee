@@ -31,9 +31,11 @@ class Runner(object):
 
         utils.create_resources(workflow_class)
 
-    def start(self, **kwargs):
-        log.info("Verifying SWF Resources")
-        self.create_resources()
+    def start(self, sync=True, **kwargs):
+
+        if sync:
+            log.info("Verifying SWF Resources")
+            self.create_resources()
 
         log.info("Starting workers")
 
