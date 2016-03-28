@@ -86,7 +86,21 @@ class Workflow(object):
         }
 
         client = utils.get_client()
-        client.start_workflow_execution(**kwargs)
+
+        try:
+            log.debug("Starting workflow execution with: %s", kwargs)
+            result = client.start_workflow_execution(**kwargs)
+        except Exception as e:
+            log.error(
+                "Failed to start workflow '%s@%s' "
+                "reason: %s",
+                workflow_type_name, workflow_type_version, e.message
+            )
+
+        run_id = result["runId"]
+        workflow_id = workflow_id
+
+        return workflow_id, run_id
 
     def __init__(self):
         self.meta = None
