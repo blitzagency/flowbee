@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import logging
 import uuid
+import os.path
 from dotenv import load_dotenv
 from .. import utils
 from .. import compression
@@ -182,8 +183,16 @@ class Workflow(object):
         if filename is None:
             return
 
+        if os.path.isabs(filename):
+            path = filename
+        else:
+            if filename.startswith("~"):
+                path = os.path.expanduser(filename)
+            else:
+                path = os.path.realpath(filename)
+
         try:
-            load_dotenv(filename)
+            load_dotenv(path)
         except Exception as e:
             log.error(e.message)
             raise
