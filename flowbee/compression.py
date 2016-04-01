@@ -4,13 +4,18 @@ import gzip
 import json
 import base64
 from cStringIO import StringIO
+from . import encoders
 
 
 log = logging.getLogger(__name__)
 
 
+def to_json(data):
+    return json.dumps(data, cls=encoders.JSONEncoder)
+
+
 def compress_b64_json(value):
-    result = compress_b64(json.dumps(value))
+    result = compress_b64(to_json(value))
     return result
 
 
