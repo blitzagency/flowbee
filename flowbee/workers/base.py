@@ -49,7 +49,6 @@ class Worker(object):
                 continue
 
             z_result = activity.serialize(result)
-            print("serialized result " + result)
 
             try:
                 utils.complete_activity(
