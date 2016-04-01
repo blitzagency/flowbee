@@ -40,7 +40,7 @@ class WorkerRunner(Runner):
 @click.option('--pidfile', "-p", default="/tmp/swfworker.pid", help="PID file")
 @click.option('--sync/--no-sync', default=True, help="Should AWS SWF Resources be created?")
 @click.option('--environ', "-e", default=None, help="Enviroment variables to load")
-@click.option('--dev', default=False, help="Ignore workers, start in foregound")
+@click.option('--dev', is_flag=True, help="Ignore workers, start in foregound")
 def main(workers, workflow, pidfile, sync, environ, dev):
     init_logging()
     runner = WorkerRunner(
