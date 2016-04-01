@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 
 class DeciderRunner(Runner):
-    def process(self, process_id, workflow_name):
+    def process(self, process_id, workflow_name, environ=None):
         pid = os.getpid()
         log.info("Starting Decider Worker '%s' @ %s", pid)
 
@@ -25,7 +25,11 @@ class DeciderRunner(Runner):
             sys.exit(1)
 
         log.info("Loaded workflow '%s'", workflow_name)
-        decider = Decider(workflow_class())
+
+        workflow = workflow_class()
+        workflow.load_environment(environ)
+
+        decider = Decider(workflow)
         decider.poll()
 
 
@@ -35,9 +39,15 @@ class DeciderRunner(Runner):
 @click.option('--workflow', "-f", required=True, help="Python path for workflow ex: foo.bar.Baz")
 @click.option('--pidfile', "-p", default="/tmp/swfdecider.pid", help="PID file")
 @click.option('--sync/--no-sync', default=True, help="Should AWS SWF Resources be created?")
-def main(workers, workflow, pidfile, sync):
+@click.option('--environ', "-e", default=None, help="Enviroment variables to load")
+def main(workers, workflow, pidfile, sync, environ):
     init_logging()
-    runner = DeciderRunner(workers=workers, workflow=workflow, pidfile=pidfile)
+    runner = DeciderRunner(
+        workers=workers,
+        workflow=workflow,
+        pidfile=pidfile,
+        environ=environ
+    )
 
     def sighup(signal, frame):
         runner.hup()

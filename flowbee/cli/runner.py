@@ -13,6 +13,7 @@ class Runner(object):
         self.workers = kwargs["workers"]
         self.workflow = kwargs["workflow"]
         self.pid = kwargs["pidfile"]
+        self.environ = kwargs.get("environ")
 
     def get_workflow_class(self):
         try:
@@ -39,11 +40,11 @@ class Runner(object):
 
         log.info("Starting workers")
 
-        # self.process(0, self.workflow, **kwargs)
+        # self.process(0, self.workflow, self.environ, **kwargs)
         # return
 
         for id in xrange(self.workers):
-            args = (id, self.workflow)
+            args = (id, self.workflow, self.environ)
             p = Process(target=self.process, args=args, kwargs=kwargs)
             p.daemon = True
             p.start()
@@ -68,5 +69,5 @@ class Runner(object):
         reload(module)
         self.start()
 
-    def process(self, process_id, workflow_name):
+    def process(self, process_id, workflow_name, environ=None):
         raise NotImplementedError()

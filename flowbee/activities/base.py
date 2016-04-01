@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import logging
 import uuid
+from dotenv import load_dotenv
 from .. import utils
 from .. import compression
 from .utils import timer
@@ -86,7 +87,6 @@ class Workflow(object):
                 "'200', got '%s' in %s", status_code, response
             )
             return False
-
 
     @classmethod
     def start_execution(
@@ -177,5 +177,13 @@ class Workflow(object):
         self.client = None
         self.identifier = None
 
+    def load_environment(self, filename=None):
 
+        if filename is None:
+            return
 
+        try:
+            load_dotenv(filename)
+        except Exception as e:
+            log.error(e.message)
+            raise
