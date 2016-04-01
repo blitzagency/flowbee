@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import logging
 import uuid
 import os.path
-from dotenv import load_dotenv
+import dotenv
 from .. import utils
 from .. import compression
 from .utils import timer
@@ -192,7 +192,7 @@ class Workflow(object):
                 path = os.path.realpath(filename)
 
         try:
-            load_dotenv(path)
+            dotenv.read_dotenv(path)
         except Exception as e:
             log.error(e.message)
             raise
