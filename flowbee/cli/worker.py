@@ -12,8 +12,11 @@ from .. import utils
 
 class WorkerRunner(Runner):
     def process(self, process_id, workflow_name, environ=None, log_config=None, log_level="INFO"):
-        init_logging(log_config, workflow=workflow_name, log_level=log_level)
+        # load environment first as logging can use environment
+        # var expansion via os.path.expandvars
         init_environment(environ)
+        init_logging(log_config, workflow=workflow_name, log_level=log_level)
+
         log = logging.getLogger("flowbee.cli.worker")
 
         pid = os.getpid()
@@ -44,8 +47,11 @@ class WorkerRunner(Runner):
 @click.option('--dev', is_flag=True, help="Ignore workers, start in foregound")
 def main(workers, workflow, pidfile, sync, environ, log_config, log_level, dev):
     log_level = log_level.upper()
-    init_logging(log_config, workflow=workflow, log_level=log_level)
+
+    # load environment first as logging can use environment
+    # var expansion via os.path.expandvars
     init_environment(environ)
+    init_logging(log_config, workflow=workflow, log_level=log_level)
 
     runner = WorkerRunner(
         workers=workers,
