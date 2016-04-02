@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import os
 import sys
 import logging
 from multiprocessing import Process
@@ -14,6 +15,8 @@ class Runner(object):
         self.workflow = kwargs["workflow"]
         self.pid = kwargs["pidfile"]
         self.environ = kwargs.get("environ")
+        self.log_config = kwargs.get("log_config")
+        self.log_level = kwargs.get("log_level", "INFO")
 
     def get_workflow_class(self):
         try:
@@ -41,11 +44,12 @@ class Runner(object):
         log.info("Starting workers")
 
         if dev:
-            self.process(0, self.workflow, self.environ, **kwargs)
+            log.info("Developer Mode Enabled")
+            self.process(0, self.workflow, self.environ, self.log_config, self.log_level, **kwargs)
             return
 
         for id in xrange(self.workers):
-            args = (id, self.workflow, self.environ)
+            args = (id, self.workflow, self.environ, self.log_config, self.log_level)
             p = Process(target=self.process, args=args, kwargs=kwargs)
             p.daemon = True
             p.start()
@@ -70,5 +74,5 @@ class Runner(object):
         reload(module)
         self.start()
 
-    def process(self, process_id, workflow_name, environ=None):
+    def process(self, process_id, workflow_name, environ=None, log_config=None):
         raise NotImplementedError()

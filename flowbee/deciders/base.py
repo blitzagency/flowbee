@@ -28,7 +28,7 @@ class Decider(object):
                 continue
 
             last_event = event_history[-1]
-            log.info("Received new task '%s'", last_event["eventType"])
+            log.debug("Received new task '%s'", last_event["eventType"])
 
             meta = utils.get_task_meta(task, self.workflow.domain, self.workflow.tasklist)
             client = self.client

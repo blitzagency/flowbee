@@ -4,19 +4,20 @@ import sys
 import logging
 import signal
 import click
-from .logging import init_logging
+from .utils import (init_environment, init_logging)
 from .runner import Runner
 from ..deciders import Decider
 from .. import utils
 
 
-log = logging.getLogger(__name__)
-
-
 class DeciderRunner(Runner):
-    def process(self, process_id, workflow_name, environ=None):
+    def process(self, process_id, workflow_name, environ=None, log_config=None, log_level="INFO"):
+        init_logging(log_config, workflow=workflow_name, log_level=log_level)
+        init_environment(environ)
+
+        log = logging.getLogger("flowbee.cli.decider")
         pid = os.getpid()
-        log.info("Starting Decider Worker '%s' @ %s", pid)
+        log.info("[%s] Starting Decider Worker", pid)
 
         try:
             workflow_class = utils.import_class(workflow_name)
@@ -24,11 +25,9 @@ class DeciderRunner(Runner):
             log.error("Failed to import %s", workflow_name)
             sys.exit(1)
 
-        log.info("Loaded workflow '%s'", workflow_name)
+        log.debug("Loaded workflow '%s'", workflow_name)
 
         workflow = workflow_class()
-        workflow.load_environment(environ)
-
         decider = Decider(workflow)
         decider.poll()
 
@@ -40,14 +39,21 @@ class DeciderRunner(Runner):
 @click.option('--pidfile', "-p", default="/tmp/swfdecider.pid", help="PID file")
 @click.option('--sync/--no-sync', default=True, help="Should AWS SWF Resources be created?")
 @click.option('--environ', "-e", default=None, help="Enviroment variables to load")
+@click.option('--log-config', default=None, help="Standard python logging configuration formatted file")
+@click.option('--log-level', default="INFO", help="Logging level. Specifying a log config negates this option")
 @click.option('--dev', is_flag=True, help="Ignore workers, start in foregound")
-def main(workers, workflow, pidfile, sync, environ, dev):
-    init_logging()
+def main(workers, workflow, pidfile, sync, environ, log_config, log_level, dev):
+    log_level = log_level.upper()
+    init_logging(log_config, workflow=workflow, log_level=log_level)
+    init_environment(environ)
+
     runner = DeciderRunner(
         workers=workers,
         workflow=workflow,
         pidfile=pidfile,
-        environ=environ
+        environ=environ,
+        log_config=log_config,
+        log_level=log_level
     )
 
     def sighup(signal, frame):

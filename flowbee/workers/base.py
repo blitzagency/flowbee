@@ -28,6 +28,8 @@ class Worker(object):
             meta = utils.get_task_meta(task, self.workflow.domain, self.workflow.tasklist)
             client = self.client
 
+            log.debug("Received new task %s", task)
+
             try:
                 activity = events.Activity(meta, task)
             except exceptions.EventException as e:

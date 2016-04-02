@@ -1,8 +1,6 @@
 from __future__ import absolute_import
 import logging
 import uuid
-import os.path
-import dotenv
 from .. import utils
 from .. import compression
 from .utils import timer
@@ -177,22 +175,3 @@ class Workflow(object):
         self.meta = None
         self.client = None
         self.identifier = None
-
-    def load_environment(self, filename=None):
-
-        if filename is None:
-            return
-
-        if os.path.isabs(filename):
-            path = filename
-        else:
-            if filename.startswith("~"):
-                path = os.path.expanduser(filename)
-            else:
-                path = os.path.realpath(filename)
-
-        try:
-            dotenv.read_dotenv(path)
-        except Exception as e:
-            log.error(e.message)
-            raise
