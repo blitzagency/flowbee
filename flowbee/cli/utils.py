@@ -21,19 +21,15 @@ def normalize_path(path):
 
 
 def init_environment(filename):
-    log = logging.getLogger(__name__)
 
     if filename is None:
         return
 
     path = normalize_path(filename)
 
-    log.debug("Loading environment from '%s'", path)
-
     try:
         dotenv.read_dotenv(path)
-    except Exception as e:
-        log.error(e.message)
+    except Exception:
         raise
 
 
