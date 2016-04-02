@@ -48,7 +48,8 @@ def init_logging(filename, workflow, log_level="INFO"):
     result = {}
 
     with open(path) as f:
-        result = json.loads(f.read())
+        data = os.path.expandvars(f.read())
+        result = json.loads(data)
 
     logging.config.dictConfig(result)
 
