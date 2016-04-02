@@ -38,7 +38,7 @@ class DeciderRunner(Runner):
 @click.version_option(version='0.0.1')
 @click.option('--workers', "-w", default=1, help="Number of workers.")
 @click.option('--workflow', "-f", required=True, help="Python path for workflow ex: foo.bar.Baz")
-@click.option('--pidfile', "-p", default="/tmp/swfdecider.pid", help="PID file")
+@click.option('--pidfile', "-p", default="/tmp/flowbee_decider.pid", help="PID file")
 @click.option('--sync/--no-sync', default=True, help="Should AWS SWF Resources be created?")
 @click.option('--environ', "-e", default=None, help="Enviroment variables to load")
 @click.option('--log-config', default=None, help="Standard python logging configuration formatted file")
