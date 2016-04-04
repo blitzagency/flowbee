@@ -130,9 +130,9 @@ class Decider(object):
         client = self.client
 
         if next_page_token is None:
-            log.info("Listening for Decision Task on '%s@%s'", tasklist, domain)
+            log.debug("Listening for Decision Task on '%s@%s'", tasklist, domain)
         else:
-            log.info("Fetching next page for '%s@%s'", tasklist, domain)
+            log.debug("Fetching next page for '%s@%s'", tasklist, domain)
 
         task = utils.poll_for_decision_task(
             client=client,

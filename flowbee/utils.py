@@ -279,7 +279,7 @@ def poll_for_decision_task(client, domain, identity, tasklist, next_page_token=N
 
     log.debug("Received new decision task: \n%s", pprint.pformat(task))
     if "taskToken" not in task:
-        log.info("Poll timed out, no new task.")
+        log.debug("Poll timed out, no new task.")
         return None
 
     if "events" not in task:
@@ -306,7 +306,7 @@ def poll_for_activity_task(client, domain, identity, tasklist):
     log.debug("Received new activity task: \n%s", pprint.pformat(task))
 
     if "taskToken" not in task:
-        log.info("Poll timed out, no new task.")
+        log.debug("Poll timed out, no new task.")
         return None
 
     return task

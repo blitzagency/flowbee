@@ -81,7 +81,7 @@ class Worker(object):
     def poll_for_task(self, domain, identity, tasklist):
         client = self.client
 
-        log.info("Listening for Activity Task on '%s@%s'", tasklist, domain)
+        log.debug("Listening for Activity Task on '%s@%s'", tasklist, domain)
 
         task = utils.poll_for_activity_task(
             client=client,
