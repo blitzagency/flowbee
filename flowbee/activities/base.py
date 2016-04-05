@@ -165,6 +165,7 @@ class Workflow(object):
                 "reason: %s",
                 workflow_type_name, workflow_type_version, e.message
             )
+            raise
 
         run_id = result["runId"]
         workflow_id = workflow_id
