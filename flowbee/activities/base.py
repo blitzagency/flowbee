@@ -62,30 +62,32 @@ class Workflow(object):
             log.debug("Canceling workflow execution with: %s", kwargs)
             response = client.terminate_workflow_execution(**kwargs)
         except Exception as e:
-            log.error(
-                "Failed to cancel workflow '%s' with run_id '%s' "
-                "reason: %s",
-                workflow_id, run_id, e.message
+            message = (
+                "Failed to cancel workflow '{}' with run_id '{}' "
+                "reason: {}".format(workflow_id, run_id, e.message)
             )
-            return False
+            log.error(message)
+            raise Exception(message)
 
         try:
             status_code = response["ResponseMetadata"]["HTTPStatusCode"]
         except KeyError as e:
-            log.error(
+            message = (
                 "Failed to get status code from cancel "
-                "response. Missing key: '%s' %s", e.message, response
+                "response. Missing key: '{}' {}".format(e.message, response)
             )
-            return False
+            log.error(message)
+            raise Exception(message)
 
         if status_code == 200:
             return True
         else:
-            log.error(
+            message = (
                 "Cancel response status code was not "
-                "'200', got '%s' in %s", status_code, response
+                "'200', got '{}' in {}".format(status_code, response)
             )
-            return False
+            log.error(message)
+            raise Exception(message)
 
     @classmethod
     def start_execution(
