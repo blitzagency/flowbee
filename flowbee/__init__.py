@@ -2,4 +2,4 @@
 
 __author__ = 'Adam Venturella'
 __email__ = 'aventurella@blitzagency.com'
-__version__ = '0.0.16'
+__version__ = '0.0.17'
