@@ -38,8 +38,13 @@ class Runner(object):
 
         log.info("Starting worker")
 
-        self.process(self.workflow, self.environ, self.log_config, self.log_level, **kwargs)
-        return
+        self.process(
+            workflow_name=self.workflow,
+            environ=self.environ,
+            log_config=self.log_config,
+            log_level=self.log_level,
+            **kwargs
+        )
 
-    def process(self, process_id, workflow_name, environ=None, log_config=None):
+    def process(self, process_id, workflow_name, environ=None, log_config=None, log_level="INFO"):
         raise NotImplementedError()

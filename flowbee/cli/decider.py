@@ -12,6 +12,7 @@ from .. import utils
 class DeciderRunner(Runner):
     def process(self, workflow_name, environ=None, log_config=None, log_level="INFO"):
         log = logging.getLogger("flowbee.cli.decider")
+
         pid = os.getpid()
         log.info("[%s] Starting Decider", pid)
 
@@ -43,7 +44,7 @@ def main(workflow, sync, environ, log_config, log_level):
     init_logging(log_config, workflow=workflow, log_level=log_level)
 
     runner = DeciderRunner(
-        workflow_name=workflow,
+        workflow=workflow,
         environ=environ,
         log_config=log_config,
         log_level=log_level
