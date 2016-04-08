@@ -1,8 +1,6 @@
 from __future__ import absolute_import
-import os
 import sys
 import logging
-from multiprocessing import Process
 from .. import utils
 
 log = logging.getLogger(__name__)
@@ -10,10 +8,7 @@ log = logging.getLogger(__name__)
 
 class Runner(object):
     def __init__(self, **kwargs):
-        self.processes = []
-        self.workers = kwargs["workers"]
         self.workflow = kwargs["workflow"]
-        self.pid = kwargs["pidfile"]
         self.environ = kwargs.get("environ")
         self.log_config = kwargs.get("log_config")
         self.log_level = kwargs.get("log_level", "INFO")
@@ -35,44 +30,16 @@ class Runner(object):
 
         utils.create_resources(workflow_class)
 
-    def start(self, sync=True, dev=False, **kwargs):
+    def start(self, sync=True, **kwargs):
 
         if sync:
             log.info("Verifying SWF Resources")
             self.create_resources()
 
-        log.info("Starting workers")
+        log.info("Starting worker")
 
-        if dev:
-            log.info("Developer Mode Enabled")
-            self.process(0, self.workflow, self.environ, self.log_config, self.log_level, **kwargs)
-            return
-
-        for id in xrange(self.workers):
-            args = (id, self.workflow, self.environ, self.log_config, self.log_level)
-            p = Process(target=self.process, args=args, kwargs=kwargs)
-            p.daemon = True
-            p.start()
-            self.processes.append(p)
-
-        for process in self.processes:
-            process.join()
-
-    def stop(self):
-        log.info("Terminating workers")
-        for each in self.processes:
-            if each.is_alive():
-                each.terminate()
-
-        self.processes = []
-
-    def hup(self):
-        log.info("Received HUP")
-        self.stop()
-        # see importlib for py3 for the same functionality
-        module = utils.import_action(self.workflow.rsplit(".", 1)[0])
-        reload(module)
-        self.start()
+        self.process(self.workflow, self.environ, self.log_config, self.log_level, **kwargs)
+        return
 
     def process(self, process_id, workflow_name, environ=None, log_config=None):
         raise NotImplementedError()
