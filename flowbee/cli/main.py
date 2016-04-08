@@ -94,6 +94,8 @@ def build_app(type, workers, workflow, sync, environ, log_config, log_level, **k
         "cmd": " ".join(cmd),
         "numprocesses": workers,
         "send_hup": True,
+        "copy_env": True,
+        "copy_path": True
     }
 
     virtualenv = os.getenv("VIRTUAL_ENV")
@@ -101,7 +103,6 @@ def build_app(type, workers, workflow, sync, environ, log_config, log_level, **k
     if virtualenv:
         app.update({
             "virtualenv": virtualenv,
-            "copy_env": True
         })
 
     app.update(kw)
