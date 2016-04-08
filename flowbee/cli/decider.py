@@ -11,11 +11,6 @@ from .. import utils
 
 class DeciderRunner(Runner):
     def process(self, workflow_name, environ=None, log_config=None, log_level="INFO"):
-        # load environment first as logging can use environment
-        # var expansion via os.path.expandvars
-        init_environment(environ)
-        init_logging(log_config, workflow=workflow_name, log_level=log_level)
-
         log = logging.getLogger("flowbee.cli.decider")
         pid = os.getpid()
         log.info("[%s] Starting Decider", pid)
@@ -42,9 +37,13 @@ class DeciderRunner(Runner):
 @click.option('--log-level', default="INFO", help="Logging level. Specifying a log config negates this option")
 def main(workflow, sync, environ, log_config, log_level):
     log_level = log_level.upper()
+    # load environment first as logging can use environment
+    # var expansion via os.path.expandvars
+    init_environment(environ)
+    init_logging(log_config, workflow=workflow, log_level=log_level)
 
     runner = DeciderRunner(
-        workflow=workflow,
+        workflow_name=workflow,
         environ=environ,
         log_config=log_config,
         log_level=log_level
