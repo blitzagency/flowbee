@@ -20,8 +20,15 @@ class Activities(object):
     def sleep(self, seconds):
         identifier = self.workflow.identifier
 
-        log.info("Scheduling '%s' to continue %ss from now", identifier, seconds)
+        if seconds < 0:
+            log.warning(
+                "Attempting to schedule timer for "
+                "%ss from now, values must be greater than "
+                "or equal to 0. Automatically setting to 0", seconds
+            )
+            seconds = 0
 
+        log.info("Scheduling '%s' to continue %ss from now", identifier, seconds)
         utils.schedule_later(
             client=self.client,
             task_token=self.workflow.meta.task_token,
