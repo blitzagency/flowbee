@@ -45,21 +45,23 @@ class MyWorkflow(Workflow):
 python -m flowbee.cli.main --help
 
 python -m flowbee.cli.main \
-    --type worker \ # worker or decider
-    -w 2 \ # num listeners
-    -e configs/prod.env \ # any anvironment vars to load
-    -f fxworkflows.scheduled_publishing.ScheduledPublishingWorkflow \ # what workflow are we executing
-    --pidfile /tmp/scheduled_publishing_worker.pid \ # pid file
-    --log-config configs/logging.json # logging config
+    --type worker \                                                   # worker or decider
+    -w 2 \                                                            # num listeners
+    -e configs/prod.env \                                             # any anvironment vars to load
+    -f path.to.my.Workflow \                                          # what workflow are we executing
+    --pidfile /tmp/scheduled_publishing_worker.pid \                  # pid file
+    --log-config configs/logging.json                                 # logging config
 
 python -m flowbee.cli.main \
-    --type decider \ # worker or decider
-    -w 2 \ # num listeners
-    -e configs/prod.env \ # any anvironment vars to load
-    -f fxworkflows.scheduled_publishing.ScheduledPublishingWorkflow \ what workflow are we executing
-    --pidfile /tmp/scheduled_publishing_decider.pid \ # pid file
-    --log-config configs/logging.json # logging config
+    --type decider \                                                  # worker or decider
+    -w 2 \                                                            # num listeners
+    -e configs/prod.env \                                             # any anvironment vars to load
+    -f path.to.my.Workflow \                                          # what workflow are we executing
+    --pidfile /tmp/scheduled_publishing_decider.pid \                 # pid file
+    --log-config configs/logging.json                                 # logging config
 ```
+
+Note the above invocations are the same with the exception of `--type`
 
 Now lets invoke it:
 
