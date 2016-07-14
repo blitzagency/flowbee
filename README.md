@@ -53,7 +53,7 @@ python -m flowbee.cli.main \
     --type worker \                                                   # worker or decider
     -w 2 \                                                            # num listeners
     -e configs/prod.env \                                             # any anvironment vars to load
-    -f path.to.my.Workflow \                                          # what workflow are we executing
+    -f path.to.my.MyWorkflow \                                        # what workflow are we executing
     --pidfile /tmp/scheduled_publishing_worker.pid \                  # pid file
     --log-config configs/logging.json                                 # logging config
 
@@ -61,16 +61,19 @@ python -m flowbee.cli.main \
     --type decider \                                                  # worker or decider
     -w 2 \                                                            # num listeners
     -e configs/prod.env \                                             # any anvironment vars to load
-    -f path.to.my.Workflow \                                          # what workflow are we executing
+    -f path.to.my.MyWorkflow \                                        # what workflow are we executing
     --pidfile /tmp/scheduled_publishing_decider.pid \                 # pid file
     --log-config configs/logging.json                                 # logging config
 ```
 
 Note the above invocations are the same with the exception of `--type`
 
-Now lets invoke it:
+Now that our worker(s)/decider(s) have started lets tell SWF to run it:
 
 ```python
+from path.to.my import MyWorkflow 
+
+
 for each in xrange(2):
     MyWorkflow.start_execution(
         input={"meta": {}, "data": {"a": "b", "b": 1}},
@@ -79,6 +82,7 @@ for each in xrange(2):
         task_start_to_close_timeout="10"
     )
 
+# run an alternate version (note: version="0.0.2")
 for each in xrange(2):
     MyWorkflow.start_execution(
         input={"meta": {}, "data": {"a": "b", "b": 1}},
