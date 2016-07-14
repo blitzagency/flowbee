@@ -83,6 +83,7 @@ for each in xrange(2):
     )
 
 # run an alternate version (note: version="0.0.2")
+# this will run @entrypoint(version="0.0.2")
 for each in xrange(2):
     MyWorkflow.start_execution(
         input={"meta": {}, "data": {"a": "b", "b": 1}},
