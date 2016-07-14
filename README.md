@@ -44,6 +44,11 @@ class MyWorkflow(Workflow):
 
 python -m flowbee.cli.main --help
 
+or from the source:
+
+https://github.com/blitzagency/flowbee/blob/master/flowbee/cli/main.py
+
+
 python -m flowbee.cli.main \
     --type worker \                                                   # worker or decider
     -w 2 \                                                            # num listeners
